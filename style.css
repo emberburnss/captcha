@@ -134,3 +134,32 @@ body {
   max-width: 520px;
   line-height: 1.8;
 }
+
+/* ── camera page ── */
+.camera-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  max-width: 480px;
+}
+
+.camera-icon {
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.camera-prompt {
+  font-size: 30px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.camera-disclaimer {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1.6;
+}
