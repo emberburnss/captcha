@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAPTCHA — verification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="screen screen-round">
+
+    <!-- top bar -->
+    <div class="round-topbar">
+      <span class="round-counter">round 1 / 7</span>
+      <span class="round-status">identity verification in progress.</span>
+    </div>
+
+    <!-- main content -->
+    <div class="round-content">
+
+      <!-- left column: scenario + submit -->
+      <div class="round-left">
+        <p class="scenario-text">
+          you loudly drop your water bottle in the middle of a lecture.
+          everyone turns to look at you.
+        </p>
+        <a href="fail.html" class="btn">submit reaction</a>
+      </div>
+
+      <!-- right column: webcam + reading -->
+      <div class="round-right">
+        <div class="webcam-frame">
+          <video id="webcam" autoplay playsinline muted></video>
+          <div class="rec-indicator">
+            <span class="rec-dot"></span>
+            REC 00:00
+          </div>
+        </div>
+        <div class="emotion-reading">
+          <span class="reading-label">reading:</span>
+          <span class="reading-output" id="emotion-output">analyzing...</span>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // request webcam access and display the feed
+    async function startWebcam() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        document.getElementById('webcam').srcObject = stream;
+      } catch (err) {
+        console.error('webcam access denied:', err);
+      }
+    }
+
+    startWebcam();
+  </script>
+
+</body>
+</html>
