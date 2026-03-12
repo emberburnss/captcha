@@ -1,1 +1,136 @@
+/* ── variables ── */
+:root {
+  --bg:        #f4f4f2;
+  --text:      #1a1a1a;
+  --muted:     #888884;
+  --red:       #E24B4A;
+  --border:    rgba(26, 26, 26, 0.15);
+  --font:      'Kode Mono', monospace;
+}
 
+/* ── reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── base ── */
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background-color: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* ── screen layout ── */
+/* every page uses this as its root container */
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  position: relative;
+}
+
+/* ── landing page ── */
+.landing-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.site-title {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.site-subtitle {
+  font-size: 30px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* ── button ── */
+.btn {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 28px;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text);
+  background: transparent;
+  border: 0.5px solid var(--text);
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.btn-red {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.btn-red:hover {
+  background: var(--red);
+  color: var(--bg);
+}
+
+/* ── fine print ── */
+.fine-print {
+  position: absolute;
+  bottom: 28px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 0 60px;
+  line-height: 1.6;
+}
+
+/* ── shout line (failure screens rounds 1–4) ── */
+.shout {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--red);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* ── body text (failure screens) ── */
+.verdict-body {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--muted);
+  text-align: center;
+  max-width: 520px;
+  line-height: 1.8;
+}
+
+.verdict-body-red {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--red);
+  text-align: center;
+  max-width: 520px;
+  line-height: 1.8;
+}
