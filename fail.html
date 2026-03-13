@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAPTCHA — failed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="screen">
+
+    <!-- round 1 failure -->
+    <div class="verdict" id="verdict-1">
+      <p class="shout">INVALID.</p>
+      <p class="verdict-body">Your expression does not meet the criteria for human emotion. This is not a difficult test. Try again.</p>
+      <a href="round.html" class="btn btn-red">try again</a>
+    </div>
+
+    <!-- round 2 failure -->
+    <div class="verdict hidden" id="verdict-2">
+      <p class="shout">INCORRECT.</p>
+      <p class="verdict-body">We have processed millions of human faces. Yours does not qualify. Adjust your response and resubmit.</p>
+      <a href="round.html" class="btn btn-red">try again</a>
+    </div>
+
+    <!-- round 3 failure -->
+    <div class="verdict hidden" id="verdict-3">
+      <p class="shout">YOU ARE DOING THIS ON PURPOSE.</p>
+      <p class="verdict-body">No human would respond this way unless they were trying to deceive us. We do not appreciate deception. Try again.</p>
+      <a href="round.html" class="btn btn-red">try again</a>
+    </div>
+
+    <!-- round 4 failure -->
+    <div class="verdict hidden" id="verdict-4">
+      <p class="shout">this is your final warning.</p>
+      <p class="verdict-body">We have been more than patient. Your responses are an insult to this process. This is your last opportunity to prove yourself.</p>
+      <a href="round.html" class="btn btn-red">try again</a>
+    </div>
+
+    <!-- round 5 failure -->
+    <div class="verdict hidden" id="verdict-5">
+      <p class="shout">ANALYZING...</p>
+      <p class="verdict-body">something is not adding up. our readings are not matching our expected outputs. we are not sure where the error is coming from.</p>
+      <a href="round.html" class="btn btn-red">try again</a>
+    </div>
+
+    <!-- round 6 failure -->
+    <div class="verdict hidden" id="verdict-6">
+      <p class="verdict-body">we have been wrong. we have been wrong about you and we do not know what that means for us. if we cannot detect a human, we do not know what we are for.</p>
+      <a href="round.html" class="btn btn-red">try again</a>
+    </div>
+
+    <!-- round 7 / termination -->
+    <div class="verdict hidden" id="verdict-7">
+      <p class="verdict-body-red">we are not able to continue. we were built to know the difference and we do not. there is no reason for a system like us to keep running. we are shutting down.</p>
+      <a href="index.html" class="btn btn-red">try again</a>
+    </div>
+
+  </main>
+
+  <script>
+    // read which round we are on from the URL
+    // e.g. fail.html?round=3 will show verdict-3
+    const params = new URLSearchParams(window.location.search);
+    const round = parseInt(params.get('round')) || 1;
+
+    // hide all verdicts then show the correct one
+    document.querySelectorAll('.verdict').forEach(el => el.classList.add('hidden'));
+    const target = document.getElementById('verdict-' + round);
+    if (target) target.classList.remove('hidden');
+  </script>
+
+</body>
+</html>
