@@ -39,11 +39,18 @@
 
       <!-- right column: webcam + reading -->
       <div class="round-right">
+        <div class="confidence-reading">
+          <span class="reading-label">confidence:</span>
+          <span class="reading-output blink" id="confidence-display">--%</span>
+        </div>
         <div class="webcam-frame">
           <video id="webcam" autoplay playsinline muted></video>
+          <div class="captured-overlay hidden" id="captured-overlay">
+            <span class="captured-text">CAPTURED.</span>
+          </div>
           <div class="rec-indicator">
             <span class="rec-dot"></span>
-            REC 00:00
+            REC <span id="timer">00:00</span>
           </div>
         </div>
         <div class="emotion-reading">
@@ -118,25 +125,46 @@
     document.getElementById('scenario-text').textContent = data.scenario;
 
     // ── state ──
-    let model, webcamEl, isAnalyzing = true, currentDetection = '';
+    let model, webcamEl, webcamStream, isAnalyzing = true, currentDetection = '';
 
-    const outputEl    = document.getElementById('emotion-output');
-    const lockinBtn   = document.getElementById('lockin-btn');
-    const submitBtn   = document.getElementById('submit-btn');
+    const outputEl       = document.getElementById('emotion-output');
+    const lockinBtn      = document.getElementById('lockin-btn');
+    const submitBtn      = document.getElementById('submit-btn');
+    const timerEl        = document.getElementById('timer');
+    const overlayEl      = document.getElementById('captured-overlay');
+    const confidenceEl   = document.getElementById('confidence-display');
+
+    // ── timer ──
+    let timerSeconds = 0;
+    let timerInterval = null;
+
+    function startTimer() {
+      timerInterval = setInterval(function () {
+        timerSeconds++;
+        const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+        const secs = String(timerSeconds % 60).padStart(2, '0');
+        timerEl.textContent = mins + ':' + secs;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
 
     // ── load model and start webcam ──
     async function init() {
       const modelURL    = MODEL_URL + 'model.json';
       const metadataURL = MODEL_URL + 'metadata.json';
 
-      model   = await tmImage.load(modelURL, metadataURL);
+      model    = await tmImage.load(modelURL, metadataURL);
       webcamEl = document.getElementById('webcam');
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        webcamEl.srcObject = stream;
+        webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        webcamEl.srcObject = webcamStream;
         webcamEl.addEventListener('loadeddata', () => {
-          lockinBtn.disabled = false;
+          confidenceEl.textContent = confidenceByRound[round - 1] + '%';
+          startTimer();
           predict();
         });
       } catch (err) {
@@ -151,23 +179,41 @@
 
       const predictions = await model.predict(webcamEl);
 
+      // check again after the async call in case lock in was clicked while waiting
+      if (!isAnalyzing) return;
+
       // find the class with highest probability
       let top = predictions.reduce((a, b) => a.probability > b.probability ? a : b);
       currentDetection = top.className;
 
+      // enable lock in only after first real prediction
+      if (lockinBtn.disabled) lockinBtn.disabled = false;
+
       // show live reading while analyzing
       outputEl.textContent = currentDetection + '...';
 
-      requestAnimationFrame(predict);
+      // use setTimeout instead of requestAnimationFrame so we can fully stop the loop
+      setTimeout(predict, 100);
+    }
+
+    // ── show captured overlay ──
+    function showCaptured() {
+      overlayEl.classList.remove('hidden');
     }
 
     // ── lock in expression ──
     lockinBtn.addEventListener('click', function () {
       isAnalyzing = false;
+      stopTimer();
+      showCaptured();
 
-      // apply the wrong label and fixed confidence for this round
-      const wrongLabel  = mislabels[currentDetection] || currentDetection;
-      const confidence  = confidenceByRound[round - 1];
+      // normalise to lowercase to match mislabels keys
+      const detected = currentDetection.toLowerCase().trim();
+      const wrongLabel = mislabels[detected] || detected || 'unknown';
+      const confidence = confidenceByRound[round - 1];
+
+      // debug — open browser console (Cmd+Option+J) to see what was detected
+      console.log('detected:', currentDetection, '→ normalised:', detected, '→ label:', wrongLabel);
 
       outputEl.textContent = 'you have responded: ' + wrongLabel + ' — ' + confidence + '% confidence';
 

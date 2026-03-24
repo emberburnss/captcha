@@ -24,7 +24,7 @@ body {
   font-family: var(--font);
   background-color: var(--bg);
   color: var(--text);
-  font-size: 16px;
+  font-size: 19px;
   line-height: 1.6;
 }
 
@@ -68,30 +68,33 @@ body {
   margin-top: 16px;
   padding: 10px 28px;
   font-family: var(--font);
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 400;
-  color: var(--text);
-  background: transparent;
-  border: 0.5px solid var(--text);
+  color: var(--bg);
+  background: var(--text);
+  border: 1px solid var(--text);
   border-radius: 4px;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
 }
 
 .btn:hover {
-  background: var(--text);
+  background: var(--red);
   color: var(--bg);
+  border-color: var(--text);
 }
 
 .btn-red {
-  color: var(--red);
-  border-color: var(--red);
+  color: var(--bg);
+  background: var(--text);
+  border-color: var(--text);
 }
 
 .btn-red:hover {
   background: var(--red);
   color: var(--bg);
+  border-color: var(--text);
 }
 
 /* ── fine print ── */
@@ -118,7 +121,7 @@ body {
 
 /* ── body text (failure screens) ── */
 .verdict-body {
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 400;
   color: var(--muted);
   text-align: center;
@@ -127,7 +130,7 @@ body {
 }
 
 .verdict-body-red {
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 400;
   color: var(--red);
   text-align: center;
@@ -158,7 +161,7 @@ body {
 }
 
 .camera-disclaimer {
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 400;
   color: var(--muted);
   line-height: 1.6;
@@ -243,6 +246,25 @@ body {
   display: block;
 }
 
+/* captured overlay */
+.captured-overlay {
+  position: absolute;
+  inset: 0;
+  border: 6px solid var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(226, 75, 74, 0.85);
+}
+
+.captured-text {
+  font-family: var(--font);
+  font-size: 72px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.08em;
+}
+
 .rec-indicator {
   position: absolute;
   top: 10px;
@@ -274,14 +296,36 @@ body {
 }
 
 .reading-label {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--muted);
 }
 
 .reading-output {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--text);
   font-weight: 400;
+}
+
+/* ── confidence box above webcam ── */
+.confidence-reading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 0.5px solid var(--border);
+  border-radius: 4px;
+  background: #ebebea;
+  margin-bottom: 8px;
+}
+
+/* ── blink animation ── */
+@keyframes softblink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.blink {
+  animation: softblink 2s ease-in-out infinite;
 }
 
 /* ── failure / verdict page ── */
