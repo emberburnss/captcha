@@ -297,3 +297,10 @@ body {
 .hidden {
   display: none;
 }
+
+/* ── disabled button state ── */
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}

@@ -8,6 +8,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+
+  <!-- teachable machine libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 </head>
 <body>
 
@@ -15,20 +19,22 @@
 
     <!-- top bar -->
     <div class="round-topbar">
-      <span class="round-counter">round 1 / 7</span>
-      <span class="round-status">identity verification in progress.</span>
+      <span class="round-counter" id="round-counter">round 1 / 7</span>
+      <span class="round-status" id="round-status">identity verification in progress.</span>
     </div>
 
     <!-- main content -->
     <div class="round-content">
 
-      <!-- left column: scenario + submit -->
+      <!-- left column: scenario + buttons -->
       <div class="round-left">
-        <p class="scenario-text">
-          you loudly drop your water bottle in the middle of a lecture.
-          everyone turns to look at you.
-        </p>
-        <a href="fail.html" class="btn">submit reaction</a>
+        <p class="scenario-text" id="scenario-text"></p>
+
+        <!-- lock in button — visible while analyzing -->
+        <button class="btn" id="lockin-btn" disabled>lock in expression</button>
+
+        <!-- submit button — hidden until expression is locked -->
+        <button class="btn hidden" id="submit-btn">submit for review</button>
       </div>
 
       <!-- right column: webcam + reading -->
@@ -51,17 +57,132 @@
   </main>
 
   <script>
-    // request webcam access and display the feed
-    async function startWebcam() {
+    // ── PASTE YOUR TEACHABLE MACHINE MODEL URL HERE ──
+    const MODEL_URL = 'https://teachablemachine.withgoogle.com/models/cSmMQUG5F/';
+
+    // ── emotion misreading map ──
+    // what the machine detects → what it wrongly displays
+    const mislabels = {
+      'embarrassed': 'angry',
+      'surprised':   'disgusted',
+      'nervous':     'happy',
+      'frustrated':  'calm',
+      'confused':    'confident',
+      'happy':       'sad',
+      'blank':       'panicked'
+    };
+
+    // ── confidence arc per round (arrogant early, collapsing late) ──
+    const confidenceByRound = [94, 91, 88, 85, 61, 34, 12];
+
+    // ── round data ──
+    const rounds = [
+      {
+        status: 'identity verification in progress.',
+        scenario: 'you loudly drop your water bottle in the middle of a lecture. everyone turns to look at you.'
+      },
+      {
+        status: 'processing. anomalies detected.',
+        scenario: 'you wave back at someone who was not waving at you. they were waving at the person behind you.'
+      },
+      {
+        status: 'recalibrating. your responses are irregular.',
+        scenario: 'you slightly stumble while walking and turn around to find a person watching. how do you respond.'
+      },
+      {
+        status: '<span class="bold-red">warning.</span> behavioral patterns unrecognized.',
+        scenario: 'you are walking toward someone in a narrow hallway and you both keep moving to the same side.'
+      },
+      {
+        status: '<span class="bold-red">error.</span> reviewing detection parameters.',
+        scenario: 'you laugh at something and realize nobody else did. the room goes quiet.'
+      },
+      {
+        status: 'system confidence: <strong>CRITICAL.</strong>',
+        scenario: 'you forget the name of someone you have met more than once. they clearly remember yours.'
+      },
+      {
+        status: 'system status: <strong>UNKNOWN.</strong>',
+        scenario: 'you are not sure if you said something out loud or only thought it. you cannot tell anymore.'
+      }
+    ];
+
+    // ── read round from URL ──
+    const params = new URLSearchParams(window.location.search);
+    const round = Math.min(Math.max(parseInt(params.get('round')) || 1, 1), 7);
+    const data = rounds[round - 1];
+
+    // ── populate page ──
+    document.getElementById('round-counter').textContent = 'round ' + round + ' / 7';
+    document.getElementById('round-status').innerHTML = data.status;
+    document.getElementById('scenario-text').textContent = data.scenario;
+
+    // ── state ──
+    let model, webcamEl, isAnalyzing = true, currentDetection = '';
+
+    const outputEl    = document.getElementById('emotion-output');
+    const lockinBtn   = document.getElementById('lockin-btn');
+    const submitBtn   = document.getElementById('submit-btn');
+
+    // ── load model and start webcam ──
+    async function init() {
+      const modelURL    = MODEL_URL + 'model.json';
+      const metadataURL = MODEL_URL + 'metadata.json';
+
+      model   = await tmImage.load(modelURL, metadataURL);
+      webcamEl = document.getElementById('webcam');
+
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        document.getElementById('webcam').srcObject = stream;
+        webcamEl.srcObject = stream;
+        webcamEl.addEventListener('loadeddata', () => {
+          lockinBtn.disabled = false;
+          predict();
+        });
       } catch (err) {
         console.error('webcam access denied:', err);
+        outputEl.textContent = 'camera unavailable.';
       }
     }
 
-    startWebcam();
+    // ── run prediction loop ──
+    async function predict() {
+      if (!isAnalyzing) return;
+
+      const predictions = await model.predict(webcamEl);
+
+      // find the class with highest probability
+      let top = predictions.reduce((a, b) => a.probability > b.probability ? a : b);
+      currentDetection = top.className;
+
+      // show live reading while analyzing
+      outputEl.textContent = currentDetection + '...';
+
+      requestAnimationFrame(predict);
+    }
+
+    // ── lock in expression ──
+    lockinBtn.addEventListener('click', function () {
+      isAnalyzing = false;
+
+      // apply the wrong label and fixed confidence for this round
+      const wrongLabel  = mislabels[currentDetection] || currentDetection;
+      const confidence  = confidenceByRound[round - 1];
+
+      outputEl.textContent = 'you have responded: ' + wrongLabel + ' — ' + confidence + '% confidence';
+
+      // swap buttons
+      lockinBtn.classList.add('hidden');
+      submitBtn.classList.remove('hidden');
+    });
+
+    // ── submit for review ──
+    submitBtn.addEventListener('click', function () {
+      window.location.href = 'fail.html?round=' + round;
+    });
+
+    // ── start ──
+    init();
   </script>
 
 </body>
