@@ -212,9 +212,6 @@
       const wrongLabel = mislabels[detected] || detected || 'unknown';
       const confidence = confidenceByRound[round - 1];
 
-      // debug — open browser console (Cmd+Option+J) to see what was detected
-      console.log('detected:', currentDetection, '→ normalised:', detected, '→ label:', wrongLabel);
-
       outputEl.textContent = 'you have responded: ' + wrongLabel + ' — ' + confidence + '% confidence';
 
       // swap buttons
