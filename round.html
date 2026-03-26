@@ -119,6 +119,9 @@
     const round = Math.min(Math.max(parseInt(params.get('round')) || 1, 1), 7);
     const data = rounds[round - 1];
 
+    // ── set colour theme for this round ──
+    document.body.setAttribute('data-round', round);
+
     // ── populate page ──
     document.getElementById('round-counter').textContent = 'round ' + round + ' / 7';
     document.getElementById('round-status').innerHTML = data.status;
